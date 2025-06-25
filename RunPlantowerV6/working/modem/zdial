@@ -1,0 +1,23 @@
+#module configuration
+/dev/ttyACM0 460800
+
+#pppd options
+debug
+nodetach
+persist
+holdoff 60
+crtscts
+hide-password
+noauth
+defaultroute
+noipdefault
+usepeerdns
+ipcp-max-configure 20
+ipcp-max-failure 20
+
+#logfile configuration
+logfile /etc/ppp/ppp-logfile
+record /etc/ppp/ppp-dumplog
+
+#call to chat script
+connect '/usr/sbin/chat -v -f /etc/chatscripts/lte_dial'

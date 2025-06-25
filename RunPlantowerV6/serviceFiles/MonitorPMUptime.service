@@ -1,0 +1,14 @@
+[Unit]
+Description=MonitorPMUptime
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/bin/bash /home/particulatepi/RunPlantower/CheckRunningVersion1v3.sh
+WorkingDirectory=/home/particulatepi/RunPlantower
+StandardOutput=inherit
+StandardError=inherit
+User=particulatepi
+
+[Install]
+WantedBy=multi-user.target
