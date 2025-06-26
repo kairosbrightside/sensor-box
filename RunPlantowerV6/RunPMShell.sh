@@ -62,7 +62,7 @@ RestartScript='/home/particulatepi/RunPlantower/periodic_restart.py'
 RPMScript='/home/particulatepi/RunPlantower/RPMCounter.py'
 HeaterScript='/home/particulatepi/RunPlantower/HeaterControl.py'
 NTPScript='/home/particulatepi/RunPlantower/CheckingNTP.py'
-RebootSensor='/home/particulatepi/RunPlantower/CheckingNTP.py'
+RebootSensor='/home/particulatepi/RunPlantower/PlantowerPowerControl.py'
 
 #adjust permissions 
 #sudo chmod 755 $PlantowerScript
