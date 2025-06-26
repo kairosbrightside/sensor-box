@@ -1,4 +1,5 @@
 # SensORV6
+This Readme file contains information on the building and production of a Oregon SensOR, specifically the Protoype build currently being worked on by DEQ.
 SensOR Build Version 6 Prototype
 6-26-25 Chase Sobocinski- Cleaning up the file structure so its not so messy, will add a parts list to this file going foward
 
