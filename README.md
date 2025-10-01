@@ -1,36 +1,23 @@
 # SensORV6
-This Readme file contains information on the building and production of a Oregon SensOR, specifically the Protoype build currently being worked on by DEQ.
-SensOR Build Version 6 Prototype
-6-26-25 Chase Sobocinski- Cleaning up the file structure so its not so messy, will add a parts list to this file going foward
+Hello Dr. Erik and maybe Chase? This Readme file contains information on the building and production of a Oregon SensOR box. The original information is found [here](https://github.com/ParticulateSensOR/SensORV6). Kairos here! I am building this as an expansion of a [project](https://github.com/kairosbrightside/sps30-pi) I did last summer (electrical documentation can be found there for the SPS30 sensor). I was supposed to do this like 2 months ago but I took too long on the autosampler `</3'. 
+# Equpment list 
+| Component                  | Description / Model                                                                 | Notes                          | Have? |
+|----------------------------|-------------------------------------------------------------------------------------|--------------------------------|-------|
+| PM2.5 Sensor               | Plantower PMs5003ST                                                                 | Measures particulate matter    | ☑️    |
+| PM2.5 Sensor               | Sensirion SPS30 sensor                                                              | Measures particulate matter    | ☑️    |
+| Power Supply               | RID-65A Meanwell (5V/12V) or RT-65D (5V/24V/12V)                                    | Provides power etc             | ☑️    |
+| Computer                   | Raspberry Pi 5                                                                      | Main system controller         | ☑️    |
+| SD Card                    | SanDisk 64 GB SD Card                                                               | Storage for OS & data          | ☑️    |
+| Auto-Zero Valve            | US Solid Motorized Ball Valve, Model USS-MSV00010                                   | Switches flow for auto-zeroing | ☑️    |
+| 2x6 Terminal block         | [Amazon Link](https://www.amazon.com/dp/B09D3BV22M?ref=ppx_yo2ov_dt_b_fed_asin_title) | Breaks out clean voltage lines | ☑️    |
+| Heating Element            | [Amazon Link](https://www.amazon.com/dp/B0CLS34QN2?ref=ppx_yo2ov_dt_b_fed_asin_title) | Provides sample conditioning   | ☑️    |
+| GPIO Terminal Block w/LED  | [Amazon Link](https://www.amazon.com/dp/B09QXR6RL7?ref=ppx_yo2ov_dt_b_fed_asin_title) | Easier GPIO wiring + indicators | ☑️    |
+| Relay Board / RPi Hat      | [Amazon Link](https://www.amazon.com/dp/B07CZL2SKN?ref=ppx_yo2ov_dt_b_fed_asin_title) | Switches high-power devices    | ❌    |
+| Colored Wire               | [Amazon Link](https://www.amazon.com/dp/B0881HCN37?ref=ppx_yo2ov_dt_b_fed_asin_title) | Wiring harness / connections   | ☑️    |
+| Zero Air Pump              | <Will Insert Later>                                                                 | Supplies clean reference air   | ☑️    |
+| Rheostat                   | <Will Insert Later>                                                                 | Adjusts current / heating power | ☑️    |
+| Sensor Box                 | <Will Insert Later>                                                                 | Enclosure for system           | ❌    |
 
-________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-EQUIPMENT LIST
-________________________________________________________________________________________________________________________________________________________________________________________________________________________________
+# Purpose
+Sensor interface for real-time particulate monitoring using the SPS30 and Raspberry Pi, with CSV logging support. Drew wants a met station so it is possible I will expand in that direction too if time and money allow.
 
-PM2.5 Sensor: Plantower PMs5003ST
-
-Power Supply: Either a RID-65A Meanwell (5V/12V) or RT-65D (5V/24V/12V) Power Supply
-
-MicroController: Raspberry Pi 4
-SD Card: ScanDisk 64 Gig SD Card
-
-Auto-Zero Valve: US Solid Motorized Ball Valve, Model USS-MSV00010
-
-Voltage Rails: https://www.amazon.com/dp/B09D3BV22M?ref=ppx_yo2ov_dt_b_fed_asin_title
-
-Heating Element: https://www.amazon.com/dp/B0CLS34QN2?ref=ppx_yo2ov_dt_b_fed_asin_title
-
-GPIO Terminal Block w/LED: https://www.amazon.com/dp/B09QXR6RL7?ref=ppx_yo2ov_dt_b_fed_asin_title
-
-Relay Board/RPI Hat: https://www.amazon.com/dp/B07CZL2SKN?ref=ppx_yo2ov_dt_b_fed_asin_title
-
-Colored Wire: https://www.amazon.com/dp/B0881HCN37?ref=ppx_yo2ov_dt_b_fed_asin_title
-
-Zero Air Pump: <Will Insert Later>
-
-Rheostat: <Will Insert Later>
-
-SensOR Box: <Will Insert Later>
-________________________________________________________________________________________________________________________________________________________________________________________________________________________________
-********************************************************************************************************************************************************************************************************************************
-________________________________________________________________________________________________________________________________________________________________________________________________________________________________
