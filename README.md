@@ -26,7 +26,7 @@ Sensor interface for real-time particulate monitoring using the SPS30 and Raspbe
 Plus wire, connectors, filament, tools, etc?
 
 # Picture
-[SensORbox](images/sensORbox.pdf)
+![SensORbox](images/sensORbox.pdf)
 
 # Relation to E&M
 It's got circuits! I need to apply Ohm's Law, Kirchoff's Laws, and power calculations... I can also write about how the particle sensors use optical scattering as a detection method (I think that counts?).
