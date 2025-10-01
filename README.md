@@ -23,7 +23,7 @@ Sensor interface for real-time particulate monitoring using the SPS30 and Raspbe
 | Sensor Box                 | <Will Insert Later>                                                                 | Enclosure for system           | ❌    |
 | 80 mm computer fan         | generic?                                                                            | Fan                            | ☑️    |
 
-Plus wire, connectors, filament, tools, etc?
+Plus wire, connectors, filament, screws, tools, etc?
 
 # Picture
 [![SensOR box](images/sensORbox.png)](images/sensORbox.pdf)
