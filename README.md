@@ -1,5 +1,10 @@
 # SensORV6
 Hello Dr. Erik and maybe Chase? This Readme file contains information on the building and production of a Oregon SensOR box. The original information is found [here](https://github.com/ParticulateSensOR/SensORV6). Kairos here! I am building this as an expansion of a [project](https://github.com/kairosbrightside/sps30-pi) I did last summer (electrical documentation can be found there for the SPS30 sensor). I was supposed to do this like 2 months ago but I took too long on the autosampler `</3`. 
+
+# Purpose
+Sensor interface for real-time particulate monitoring using the SPS30 and Raspberry Pi, with CSV logging support. Drew wants a met station so it is possible I will expand in that direction too if time and money allow. 
+
+
 # Equipment list 
 | Component                  | Description / Model                                                                 | Notes                          | Have? |
 |----------------------------|-------------------------------------------------------------------------------------|--------------------------------|-------|
@@ -20,8 +25,8 @@ Hello Dr. Erik and maybe Chase? This Readme file contains information on the bui
 
 Plus wire, connectors, filament, tools, etc?
 
-# Purpose
-Sensor interface for real-time particulate monitoring using the SPS30 and Raspberry Pi, with CSV logging support. Drew wants a met station so it is possible I will expand in that direction too if time and money allow. 
+# Picture
+![SensORbox](images/SensORbox.jpg)
 
 # Relation to E&M
 It's got circuits! I need to apply Ohm's Law, Kirchoff's Laws, and power calculations... I can also write about how the particle sensors use optical scattering as a detection method (I think that counts?).
