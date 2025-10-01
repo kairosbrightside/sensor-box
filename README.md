@@ -8,11 +8,11 @@ Hello Dr. Erik and maybe Chase? This Readme file contains information on the bui
 | Power Supply               | RID-65A Meanwell (5V/12V) or RT-65D (5V/24V/12V)                                    | Provides power etc             | ☑️    |
 | Computer                   | Raspberry Pi 5                                                                      | Main system controller         | ☑️    |
 | SD Card                    | SanDisk 64 GB SD Card                                                               | Storage for OS & data          | ☑️    |
-| Auto-Zero Valve            | US Solid Motorized Ball Valve, Model USS-MSV00010                                   | Switches flow for auto-zeroing | ☑️    |
+| Auto-Zero Valve            | US Solid Motorized Ball Valve, Model USS-MSV00010                                   | Switches flow for auto-zerzxoing | ☑️    |
 | 2x6 Terminal block         | [Amazon Link](https://www.amazon.com/dp/B09D3BV22M?ref=ppx_yo2ov_dt_b_fed_asin_title) | Breaks out clean voltage lines | ☑️    |
 | Heating Element            | [Amazon Link](https://www.amazon.com/dp/B0CLS34QN2?ref=ppx_yo2ov_dt_b_fed_asin_title) | Provides sample conditioning   | ☑️    |
 | GPIO Terminal Block w/LED  | [Amazon Link](https://www.amazon.com/dp/B09QXR6RL7?ref=ppx_yo2ov_dt_b_fed_asin_title) | Easier GPIO wiring + indicators | ☑️    |
-| Relay Board / RPi Hat      | [Amazon Link](https://www.amazon.com/dp/B07CZL2SKN?ref=ppx_yo2ov_dt_b_fed_asin_title) | Switches high-power devices    | ❌    |
+| Relay Board / RPi Hat      | [Amazon Link](https://www.amazon.com/dp/B07CZL2SKN?ref=ppx_yo2ov_dt_b_fed_asin_title) | Relas=ys                     | ❌    |
 | Colored Wire               | [Amazon Link](https://www.amazon.com/dp/B0881HCN37?ref=ppx_yo2ov_dt_b_fed_asin_title) | Wiring harness / connections   | ☑️    |
 | Zero Air Pump              | <Will Insert Later>                                                                 | Supplies clean reference air   | ☑️    |
 | Rheostat                   | <Will Insert Later>                                                                 | Adjusts current / heating power | ☑️    |
