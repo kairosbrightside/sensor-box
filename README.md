@@ -20,7 +20,7 @@ Sensor interface for real-time particulate monitoring using the SPS30 and Raspbe
 | Relay Board / RPi Hat      | [Amazon Link](https://www.amazon.com/dp/B07CZL2SKN?ref=ppx_yo2ov_dt_b_fed_asin_title) | Turns stuff on and off       | ☑️    |
 | Diaphragm Pump             | <Will Insert Later>                                                                 | Supplies clean reference air   | ☑️    |
 | Rheostat                   | <Will Insert Later>                                                                 | Adjusts current / heating power | ☑️    |
-| Sensor Box                 | <Will Insert Later>                                                                 | Enclosure for system           | ❌    |
+| Sensor Box                 | <Will Insert Later>                                                                 | Enclosure for system           | ☑️    |
 | 80 mm computer fan         | generic?                                                                            | Fan                            | ☑️    |
 
 Plus wire, connectors, filament, screws, tools, etc?
