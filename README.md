@@ -30,3 +30,6 @@ Plus wire, connectors, filament, screws, tools, etc?
 
 # Relation to E&M
 It's got circuits! I need to apply Ohm's Law, Kirchoff's Laws, and power calculations... I can also write about how the particle sensors use optical scattering as a detection method (I think that counts?).
+
+Plantower sensor pinout
+<img width="874" height="399" alt="image" src="https://github.com/user-attachments/assets/1f3c9a76-47be-40a2-8d39-d621451f01c3" />
