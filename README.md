@@ -37,19 +37,16 @@ Plantower sensor pinout
 
 
 ### wiring table 
-| Function                    | Device / Load                          | Pi GPIO (BCM)            | Direction         | Voltage Logic                 | Connects to / Notes                                                                            |
-| --------------------------- | -------------------------------------- | ------------------------ | ----------------- | ----------------------------- | ---------------------------------------------------------------------------------------------- |
-| **User Button**             | Momentary push-button                  | **4**                    | Input (pull-up)   | 3.3 V logic                   | One side → GPIO 4, other → GND. Internal pull-up keeps HIGH; press = LOW.                      |
-| **Heater Control**          | Relay Channel 1 (on relay board / HAT) | **20**                   | Output            | 3.3 V logic → 5 V relay input | Drives heater relay. Relay VCC → 5 V; GND → Pi GND. COM → 12 V, NO → heater +. Heater – → GND. |
-| **Zero Control Line**       | PMS5003ST “zero” valve or flag         | **21**                   | Output            | 3.3 V                         | Set LOW = zero active. Used by Plantower script.                                               |
-| **Fan Tachometer**          | 3- or 4-wire PC fan tach signal        | **5**                    | Input (pull-up)   | 3.3 V                         | Fan yellow (tach) → GPIO 5; fan black (GND) → Pi GND. Internal pull-up OK.                     |
-| **Fan Power (on/off)**      | Fan (+12 V load)                       | *(optional)* e.g. **16** | Output            | 3.3 V logic → 5 V relay input | Relay COM → 12 V, NO → fan +. Fan – → GND.                                                     |
-| **Pump Power**              | Diaphragm pump                         | *(optional)* e.g. **17** | Output            | 3.3 V logic → 5 V relay input | Relay COM → 12 V, NO → pump +. Pump – → GND.                                                   |
-| **Valve Power**             | Auto-zero ball valve                   | *(optional)* e.g. **18** | Output            | 3.3 V logic → 5 V relay input | Relay COM → 12 V or 24 V (per valve). Valve – → GND.                                           |
-| **Plantower PM Sensor**     | PMS5003ST                              | **TX 14 / RX 15**        | UART TX/RX        | 3.3 V logic                   | Pi TX → sensor RX; Pi RX → sensor TX; sensor VCC → 5 V; GND → Pi GND.                          |
-| **Sensirion PM Sensor**     | SPS30                                  | **SDA 2 / SCL 3**        | I²C bus           | 3.3 V logic (pulled up on Pi) | SDA → GPIO 2; SCL → GPIO 3; VCC → 5 V; GND → Pi GND.                                           |
-| **Power to Pi**             | Mean Well RT-65D (5 V rail)            | —                        | Input             | 5 V DC                        | 5 V → Pi USB-C or 5 V GPIO header; GND → Pi GND.                                               |
-| **Power to Sensors**        | PMS5003ST, SPS30                       | —                        | Output (from PSU) | 5 V DC                        | From Mean Well 5 V rail (via terminal block).                                                  |
-| **Power to Relays / Loads** | Heater, Fan, Pump, Valve               | —                        | Output (from PSU) | 12 V or 24 V DC               | 12 V rail feeds relay COM terminals and loads.                                                 |
-| **Common Ground**           | All devices                            | —                        | —                 | —                             | **All grounds must be tied together** (Pi GND = sensor GND = relay GND = PSU GND).             |
+| Function                | Device / Load                       | Pi GPIO (BCM)     | Direction       | Voltage Logic                 | Notes                                                                      |
+| ----------------------- | ----------------------------------- | ----------------- | --------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| **User Button**         | Push-button (manual input)          | **4**             | Input (pull-up) | 3.3 V                         | One side → GPIO 4, other → GND. Internal pull-up enabled; press = LOW.     |
+| **Relay CH1**           | Optional (fan power / pump / spare) | **26**            | Output          | 3.3 V logic → 5 V relay input | Relay VCC → 5 V, GND → Pi GND. COM → 12 V, NO → load +. Load – → GND.      |
+| **Relay CH2**           | **Heater Control**                  | **20**            | Output          | 3.3 V logic → 5 V relay input | Drives heater relay. COM → 12 V, NO → heater +. Heater – → GND.            |
+| **Relay CH3**           | **Zero Valve Control**              | **21**            | Output          | 3.3 V logic → 5 V relay input | Activates PMS5003 zero mode (valve open).                                  |
+| **Fan Tachometer**      | PC fan tach output                  | **5**             | Input (pull-up) | 3.3 V logic                   | Fan yellow (tach) → GPIO 5; fan black (GND) → Pi GND. Internal pull-up OK. |
+| **Plantower PMS5003ST** | PM sensor (UART)                    | **TX 14 / RX 15** | TX/RX           | 3.3 V logic                   | Pi TX → sensor RX; Pi RX → sensor TX; sensor VCC → 5 V; GND → Pi GND.      |
+| **Sensirion SPS30**     | PM sensor (I²C)                     | **SDA 2 / SCL 3** | I²C bus         | 3.3 V logic                   | SDA → 2; SCL → 3; VCC → 5 V; GND → Pi GND.                                 |
+| **Mean Well RT-65D**    | Power supply                        | —                 | —               | 5 V & 12 V rails              | 5 V → Pi 5 V pin / USB-C; 12 V → relay COMs and loads.                     |
+| **Common Ground**       | —                                   | —                 | —               | —                             | All grounds (Pi, HAT, sensors, fan, PSU) must be shared.                   |
+
 
