@@ -50,3 +50,8 @@ Plantower sensor pinout
 | **Common Ground**       | —                                   | —                 | —               | —                             | All grounds (Pi, HAT, sensors, fan, PSU) must be shared.                   |
 
 
+### 5V devices:
+Particle sensors (3x), level shifters
+
+### 12V devices:
+Fan, Pumps, motorized ball valce, heater strip (rheostat)
