@@ -54,4 +54,4 @@ Plantower sensor pinout
 Particle sensors (3x), level shifters
 
 ### 12V devices:
-Fan, Pumps, motorized ball valce, heater strip (rheostat)
+Fan, Pumps, motorized ball valce, heater strip+ (rheostat)
