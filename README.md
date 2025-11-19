@@ -37,19 +37,22 @@ Plantower sensor pinout
 
 
 ### wiring table 
-| Function                | Device / Load                       | Pi GPIO (BCM)     | Direction       | Voltage Logic                 | Notes                                                                      |
-| ----------------------- | ----------------------------------- | ----------------- | --------------- | ----------------------------- | -------------------------------------------------------------------------- |
-| **User Button**         | Push-button (manual input)          | **4**             | Input (pull-up) | 3.3 V                         | One side → GPIO 4, other → GND. Internal pull-up enabled; press = LOW.     |
-| **Relay CH1**           | Optional (fan power / pump / spare) | **26**            | Output          | 3.3 V logic → 5 V relay input | Relay VCC → 5 V, GND → Pi GND. COM → 12 V, NO → load +. Load – → GND.      |
-| **Relay CH2**           | **Heater Control**                  | **20**            | Output          | 3.3 V logic → 5 V relay input | Drives heater relay. COM → 12 V, NO → heater +. Heater – → GND.            |
-| **Relay CH3**           | **Zero Valve Control**              | **21**            | Output          | 3.3 V logic → 5 V relay input | Activates PMS5003 zero mode (valve open).                                  |
-| **Fan Tachometer**      | PC fan tach output                  | **5**             | Input (pull-up) | 3.3 V logic                   | Fan yellow (tach) → GPIO 5; fan black (GND) → Pi GND. Internal pull-up OK. |
-| **Plantower PMS5003ST** | PM sensor (UART)                    | **TX 14 / RX 15** | TX/RX           | 3.3 V logic                   | Pi TX → sensor RX; Pi RX → sensor TX; sensor VCC → 5 V; GND → Pi GND.      |
-| **Sensirion SPS30**     | PM sensor (I²C)                     | **SDA 2 / SCL 3** | I²C bus         | 3.3 V logic                   | SDA → 2; SCL → 3; VCC → 5 V; GND → Pi GND.                                 |
-| **Mean Well RT-65D**    | Power supply                        | —                 | —               | 5 V & 12 V rails              | 5 V → Pi 5 V pin / USB-C; 12 V → relay COMs and loads.                     |
-| **Common Ground**       | —                                   | —                 | —               | —                             | All grounds (Pi, HAT, sensors, fan, PSU) must be shared.                   |
+| Physical Pin | BCM | Function  | Connection                           |
+|--------------|-----|-----------|---------------------------------------|
+| 6            | —   | GND       | Ground for ALL devices                |
+| 7            | 4   | GPIO4     | Button                                |
+| 8            | 14  | TXD0      | Plantower #1 → RX  (UART0)            |
+| 10           | 15  | RXD0      | Plantower #1 ← TX   (UART0)           |
+| 11           | 17  | GPIO17    | Fan tachometer                        |
+| 27           | 0   | TXD1      | SPS30 → RX (UART1 TX → Pi RX)         |
+| 28           | 1   | RXD1      | SPS30 ← TX (UART1 RX ← Pi TX)         |
+| 32           | 12  | TXD4      | Plantower #2 → RX (UART4 TX → Pi RX)  |
+| 33           | 13  | RXD4      | Plantower #2 ← TX (UART4 RX ← Pi TX)  |
+| 37           | 26  | GPIO26    | Plantower power (Relay1)              |
+| 38           | 20  | GPIO20    | Heater (Relay2)                       |
+| 40           | 21  | GPIO21    | Zero pump  (Relay3)                   |
 
-
+> Note: we are skipping UART2 since we are using gpio 4 (physical pin 7) for something else
 ### 5V devices:
 Particle sensors (3x), level shifters
 
