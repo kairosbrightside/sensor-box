@@ -54,8 +54,15 @@ Plantower sensor pinout
 
 <img width="2064" height="1185" alt="image" src="https://github.com/user-attachments/assets/e8ecd469-3049-42fc-9901-e12cf2c2a09a" />
 
-
 > Note: we are skipping UART2 since we are using gpio 4 (physical pin 7) for something else
+
+### changuing UART settings
+``` /boot/firmware/config.txt```
+```bash
+enable_uart=1
+dtoverlay=uart1
+dtoverlay=uart4
+```
 ### 5V devices:
 Particle sensors (3x), level shifters
 
