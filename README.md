@@ -63,8 +63,22 @@ enable_uart=1
 dtoverlay=uart1
 dtoverlay=uart4
 ```
+##### Checking changed UART settings:
+Use 
+```bash
+ls /dev/ttyAMA*
+```
+to make sure all the desired ports (0,1,4) are available. When sensors are connected, check output with 
+```bash
+sudo cat /dev/ttyAMA0
+sudo cat /dev/ttyAMA1
+sudo cat /dev/ttyAMA4
+```
 ### 5V devices:
 Particle sensors (3x), level shifters
+
+### Connect to Pi 3.3V ouotput
+The `SET` and `RESET` pins of the Plantower sensors... oopsies!
 
 ### 12V devices:
 Fan, Pumps, motorized ball valce, heater strip+ (rheostat)
