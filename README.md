@@ -50,7 +50,8 @@ Plantower sensor pinout
 | 33           | 13  | RXD4      | Plantower #2 ← TX (UART4 RX ← Pi TX)  |
 | 37           | 26  | GPIO26    | Plantower power (Relay1)              |
 | 38           | 20  | GPIO20    | Heater (Relay2)                       |
-| 40           | 21  | GPIO21    | Zero pump  (Relay3)                   |
+| 40           | 21  | GPIO21    | Zero pump  (Relay3, NC)               |
+| 40           | 21  | GPIO21    | Valve  (Relay3, NO)                   |
 
 <img width="2064" height="1185" alt="image" src="https://github.com/user-attachments/assets/e8ecd469-3049-42fc-9901-e12cf2c2a09a" />
 
