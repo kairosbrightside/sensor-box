@@ -1,256 +1,187 @@
 #!/usr/bin/env python3
-##### code for 2 plantower sensors and 1 sps30, all communicating through UART.
 import serial
 import time
-import csv
 import struct
+import csv
 from datetime import datetime
 
-# ============================================================
-#                   Plantower PMSx003 Class
-# ============================================================
-
-class PlantowerUART:
-    def __init__(self, port, name):
-        self.port = port
-        self.name = name
-        self.ser = None
-        self.connect()
-
-    def connect(self):
-        while True:
-            try:
-                self.ser = serial.Serial(
-                    port=self.port,
-                    baudrate=9600,
-                    bytesize=serial.EIGHTBITS,
-                    parity=serial.PARITY_NONE,
-                    stopbits=serial.STOPBITS_ONE,
-                    timeout=2
-                )
-                print(f"[OK] Connected to {self.name} on {self.port}")
-                return
-            except:
-                print(f"[ERROR] Could not open {self.port}, retrying...")
-                time.sleep(1)
+###############################################
+#  Plantower Driver (PMS5003 / PMS5003ST)
+###############################################
+class Plantower:
+    def __init__(self, port):
+        self.port = serial.Serial(
+            port=port,
+            baudrate=9600,
+            timeout=2
+        )
 
     def read_frame(self):
-        """Read a 40-byte PMS5003/ST frame"""
-        try:
-            # Look for 0x42 0x4D header
-            b1 = self.ser.read(1)
-            if b1 != b'\x42':
-                return None
+        """Reads a 32-byte or 40-byte Plantower frame."""
+        while True:
+            b1 = self.port.read(1)
+            if b1 == b'\x42':
+                b2 = self.port.read(1)
+                if b2 == b'\x4D':
+                    # Plantower ST = 40 byte frame
+                    frame = b1 + b2 + self.port.read(38)
+                    if len(frame) == 40:
+                        return self.parse_frame(frame)
 
-            b2 = self.ser.read(1)
-            if b2 != b'\x4D':
-                return None
+    def parse_frame(self, frame):
+        """Parses PMS5003ST frame."""
+        checksum = sum(frame[0:38])
+        recvd = (frame[38] << 8) + frame[39]
 
-            frame = b1 + b2 + self.ser.read(38)
-            if len(frame) != 40:
-                return None
-
-            # checksum
-            data_sum = sum(frame[0:38])
-            checksum = frame[38] * 256 + frame[39]
-            if data_sum != checksum:
-                return None
-
-            return frame
-
-        except:
-            self.connect()
-            return None
-
-    def parse(self, frame):
-        """Return a dict of parsed PMS values"""
-        if frame is None:
+        if checksum != recvd:
             return None
 
         data = {}
-        data["pm1"] = frame[10] * 256 + frame[11]
-        data["pm25"] = frame[12] * 256 + frame[13]
-        data["pm10"] = frame[14] * 256 + frame[15]
 
-        data["gt03"] = frame[16] * 256 + frame[17]
-        data["gt05"] = frame[18] * 256 + frame[19]
-        data["gt1"]  = frame[20] * 256 + frame[21]
-        data["gt25"] = frame[22] * 256 + frame[23]
-        data["gt5"]  = frame[24] * 256 + frame[25]
-        data["gt10"] = frame[26] * 256 + frame[27]
+        # Frame fields (see Plantower PMS5003ST manual)
+        data["pm1_0"]  = frame[10] * 256 + frame[11]
+        data["pm2_5"]  = frame[12] * 256 + frame[13]
+        data["pm10"]   = frame[14] * 256 + frame[15]
 
-        # PMS5003ST temperature & RH
-        unpacked = struct.unpack(">20h", frame)
-        temp_c = unpacked[15] / 10
-        data["temp_c"] = temp_c
-        data["rh"] = (frame[32] * 256 + frame[33]) / 10
+        # Particle counts
+        data["gt0_3"]  = frame[16] * 256 + frame[17]
+        data["gt0_5"]  = frame[18] * 256 + frame[19]
+        data["gt1_0"]  = frame[20] * 256 + frame[21]
+        data["gt2_5"]  = frame[22] * 256 + frame[23]
+        data["gt5_0"]  = frame[24] * 256 + frame[25]
+        data["gt10"]   = frame[26] * 256 + frame[27]
 
-        # Formaldehyde
-        data["formaldehyde"] = (frame[28] * 256 + frame[29]) / 1000
+        # Temperature & RH (ST only)
+        temp_raw = struct.unpack(">h", frame[30:32])[0]
+        rh_raw   = struct.unpack(">h", frame[32:34])[0]
+
+        data["temp_C"] = temp_raw / 10.0
+        data["rh"]     = rh_raw / 10.0
+
+        # Formaldehyde (ST)
+        data["hcho"] = (frame[28] * 256 + frame[29]) / 1000.0
 
         return data
 
 
-# ============================================================
-#                   SPS30 UART Class
-# ============================================================
-
+###############################################
+#  SPS30 UART Driver (SHDLC)
+#  On UART5 (GPIO0/1 = ID_SD/ID_SC)
+###############################################
 class SPS30_UART:
-    """
-    SPS30 UART mode sends 60-byte binary packets continuously at 115200 baud.
-    We parse them according to Sensirion format.
-    """
+    START = 0x7E
 
-    FRAME_LENGTH = 60
+    def __init__(self, port="/dev/ttyAMA5"):
+        self.ser = serial.Serial(port=port, baudrate=115200, timeout=2)
+        self.start_measurement()
 
-    def __init__(self, port):
-        self.port = port
-        self.ser = None
-        self.connect()
+    def checksum(self, byte_array):
+        return (256 - (sum(byte_array) % 256)) % 256
 
-    def connect(self):
-        while True:
-            try:
-                self.ser = serial.Serial(
-                    port=self.port,
-                    baudrate=115200,
-                    bytesize=serial.EIGHTBITS,
-                    parity=serial.PARITY_NONE,
-                    stopbits=serial.STOPBITS_ONE,
-                    timeout=2
-                )
-                print(f"[OK] Connected to SPS30 on {self.port}")
-                return
-            except:
-                print("[ERROR] Could not open SPS30 serial port, retrying...")
-                time.sleep(1)
+    def send_cmd(self, cmd_id, payload=b''):
+        frame = bytearray([self.START, cmd_id, len(payload)]) + payload
+        frame.append(self.checksum(frame[1:]))
+        self.ser.write(frame)
 
-    def read_frame(self):
-        """SPS30 UART mode: look for 0x7E header, then read fixed-length frame"""
-        try:
-            b = self.ser.read(1)
-            if b != b'\x7E':   # start byte
-                return None
+    def read_response(self):
+        head = self.ser.read(1)
+        if head != b'\x7E':
+            return None
+        cmd = self.ser.read(1)
+        length = self.ser.read(1)[0]
+        data = self.ser.read(length)
+        _checksum = self.ser.read(1)
+        return data
 
-            frame = b + self.ser.read(self.FRAME_LENGTH - 1)
-            if len(frame) != self.FRAME_LENGTH:
-                return None
+    def start_measurement(self):
+        self.send_cmd(0x00, b'\x01\x03')  # mass concentration mode
 
-            return frame
-        except:
-            self.connect()
+    def read(self):
+        self.send_cmd(0x03)
+        data = self.read_response()
+        if not data or len(data) != 60:
             return None
 
-    def parse(self, frame):
-        """Parse SPS30 frame to readable values"""
-        if frame is None:
-            return None
+        vals = struct.unpack(">ffffffffff", data[0:40])
 
-        # Payload starts after 1 byte header + 1 byte frame length + 1 byte command
-        # Sensirion format uses big-endian floats.
-        try:
-            # Extract 10 float32 values
-            payload = frame[3:3 + 10*4]
-            values = struct.unpack(">10f", payload)
-
-            return {
-                "pm1": values[0],
-                "pm25": values[1],
-                "pm4": values[2],
-                "pm10": values[3],
-                "nc05": values[4],
-                "nc1": values[5],
-                "nc25": values[6],
-                "nc4": values[7],
-                "nc10": values[8],
-                "typ_size": values[9]
-            }
-
-        except:
-            return None
+        return {
+            "pm1_0": vals[0],
+            "pm2_5": vals[1],
+            "pm4_0": vals[2],
+            "pm10": vals[3],
+            "nc0_5": vals[4],
+            "nc1_0": vals[5],
+            "nc2_5": vals[6],
+            "nc4_0": vals[7],
+            "nc10": vals[8],
+            "avg_size": vals[9]
+        }
 
 
-# ============================================================
-#                   Main Logging Loop
-# ============================================================
-
+###############################################
+#  MAIN SCRIPT — LOGS ALL 3 SENSORS
+###############################################
 def main():
+    pt1 = Plantower("/dev/ttyAMA0")  # Plantower #1 on UART0
+    pt2 = Plantower("/dev/ttyAMA1")  # Plantower #2 on UART1
+    sps = SPS30_UART("/dev/ttyAMA5") # SPS30 on UART5 (ID_SD/ID_SC)
 
-    # UART device paths
-    p1 = PlantowerUART("/dev/ttyAMA0", "Plantower #1")
-    p2 = PlantowerUART("/dev/ttyAMA4", "Plantower #2")
-    sps = SPS30_UART("/dev/ttyAMA1")
-
-    # Output CSV
-    out = open("sensor_log.csv", "w", newline="")
-    writer = csv.writer(out)
-
-    # Header row
-    writer.writerow([
-        "timestamp",
-
-        # Plantower 1
-        "p1_pm1", "p1_pm25", "p1_pm10",
-        "p1_gt03", "p1_gt05", "p1_gt1", "p1_gt25", "p1_gt5", "p1_gt10",
-        "p1_temp_c", "p1_rh", "p1_formaldehyde",
-
-        # Plantower 2
-        "p2_pm1", "p2_pm25", "p2_pm10",
-        "p2_gt03", "p2_gt05", "p2_gt1", "p2_gt25", "p2_gt5", "p2_gt10",
-        "p2_temp_c", "p2_rh", "p2_formaldehyde",
-
-        # SPS30
-        "s_pm1", "s_pm25", "s_pm4", "s_pm10",
-        "s_nc05", "s_nc1", "s_nc25", "s_nc4", "s_nc10", "s_typ_sz"
-    ])
-
-    print("\n[LOGGING] Starting 1-second unified logging...\n")
-
-    while True:
-        ts = datetime.utcnow().isoformat()
-
-        # ------- Plantower 1 -------
-        f1 = p1.read_frame()
-        d1 = p1.parse(f1) if f1 else None
-
-        # ------- Plantower 2 -------
-        f2 = p2.read_frame()
-        d2 = p2.parse(f2) if f2 else None
-
-        # ------- SPS30 -------
-        f3 = sps.read_frame()
-        d3 = sps.parse(f3) if f3 else None
-
-        # Write row
+    with open("sensor_log.csv", "w", newline="") as f:
+        writer = csv.writer(f)
         writer.writerow([
-            ts,
+            "timestamp",
 
-            # ------- Plantower 1 -------
-            *( [
-                d1["pm1"], d1["pm25"], d1["pm10"],
-                d1["gt03"], d1["gt05"], d1["gt1"],
-                d1["gt25"], d1["gt5"], d1["gt10"],
-                d1["temp_c"], d1["rh"], d1["formaldehyde"]
-              ] if d1 else [None]*12 ),
+            # PT1
+            "pt1_pm1", "pt1_pm2_5", "pt1_pm10",
+            "pt1_0_3", "pt1_0_5", "pt1_1_0",
+            "pt1_2_5", "pt1_5_0", "pt1_10",
+            "pt1_temp", "pt1_rh", "pt1_hcho",
 
-            # ------- Plantower 2 -------
-            *( [
-                d2["pm1"], d2["pm25"], d2["pm10"],
-                d2["gt03"], d2["gt05"], d2["gt1"],
-                d2["gt25"], d2["gt5"], d2["gt10"],
-                d2["temp_c"], d2["rh"], d2["formaldehyde"]
-              ] if d2 else [None]*12 ),
+            # PT2
+            "pt2_pm1", "pt2_pm2_5", "pt2_pm10",
+            "pt2_0_3", "pt2_0_5", "pt2_1_0",
+            "pt2_2_5", "pt2_5_0", "pt2_10",
+            "pt2_temp", "pt2_rh", "pt2_hcho",
 
-            # ------- SPS30 -------
-            *( [
-                d3["pm1"], d3["pm25"], d3["pm4"], d3["pm10"],
-                d3["nc05"], d3["nc1"], d3["nc25"],
-                d3["nc4"], d3["nc10"], d3["typ_size"]
-              ] if d3 else [None]*10 )
+            # SPS30
+            "sps_pm1", "sps_pm2_5", "sps_pm4", "sps_pm10",
+            "sps_nc0_5", "sps_nc1_0", "sps_nc2_5",
+            "sps_nc4_0", "sps_nc10", "sps_size"
         ])
 
-        out.flush()
-        time.sleep(1)
+        while True:
+            ts = datetime.now().isoformat()
+
+            d1 = pt1.read_frame()
+            d2 = pt2.read_frame()
+            d3 = sps.read()
+
+            if d1 and d2 and d3:
+                row = [
+                    ts,
+
+                    # PT1
+                    d1["pm1_0"], d1["pm2_5"], d1["pm10"],
+                    d1["gt0_3"], d1["gt0_5"], d1["gt1_0"],
+                    d1["gt2_5"], d1["gt5_0"], d1["gt10"],
+                    d1["temp_C"], d1["rh"], d1["hcho"],
+
+                    # PT2
+                    d2["pm1_0"], d2["pm2_5"], d2["pm10"],
+                    d2["gt0_3"], d2["gt0_5"], d2["gt1_0"],
+                    d2["gt2_5"], d2["gt5_0"], d2["gt10"],
+                    d2["temp_C"], d2["rh"], d2["hcho"],
+
+                    # SPS30
+                    d3["pm1_0"], d3["pm2_5"], d3["pm4_0"], d3["pm10"],
+                    d3["nc0_5"], d3["nc1_0"], d3["nc2_5"],
+                    d3["nc4_0"], d3["nc10"], d3["avg_size"]
+                ]
+
+                writer.writerow(row)
+                print("Logged:", row[0])
+
+            time.sleep(1)
 
 
 if __name__ == "__main__":
