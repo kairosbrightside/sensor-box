@@ -56,7 +56,7 @@ Plantower sensor pinout
 
 > Note: we are skipping UART2 since we are using gpio 4 (physical pin 7) for something else
 
-### changuing UART settings
+### changing UART settings
 ``` /boot/firmware/config.txt```
 ```bash
 enable_uart=1
@@ -77,7 +77,7 @@ sudo cat /dev/ttyAMA4
 ### 5V devices:
 Particle sensors (3x), level shifters
 
-### Connect to Pi 3.3V ouotput
+### Connect to Pi 3.3V output
 The `SET` and `RESET` pins of the Plantower sensors... oopsies!
 
 ### 12V devices:
