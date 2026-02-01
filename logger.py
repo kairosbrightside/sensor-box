@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+import os
+import glob
 import serial
 import time
 import struct
@@ -6,21 +8,35 @@ import csv
 import sys
 from datetime import datetime
 
-PT1_PORT = "/dev/ttyAMA0"   # GPIO14/15 (UART0)  Plantower #1
-PT2_PORT = "/dev/ttyAMA2"   # GPIO0/1  (UART1)   Plantower #2  (your “other ones” port)
-SPS_PORT = "/dev/ttyAMA4"   # GPIO12/13 (UART4)  SPS30
+# =========================
+# Ports
+# =========================
+PT1_PORT = "/dev/ttyAMA0"   # UART0 on GPIO14/15  -> Plantower #1 (9600)
+PT2_PORT = "/dev/ttyAMA1"   # UART1 on GPIO0/1    -> Plantower #2 (9600)
+SPS_PORT = "/dev/ttyAMA4"   # UART4 on GPIO12/13  -> SPS30 (115200)
 
 LOG_PATH = "sensor_log.csv"
 DEBUG = True
 
 def dbg(msg: str):
-    """Timestamped debug print."""
     if DEBUG:
         ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{ts}] {msg}", file=sys.stderr)
 
+def list_uarts():
+    devs = sorted(glob.glob("/dev/ttyAMA*"))
+    dbg("Available ttyAMA devices: " + (", ".join(devs) if devs else "(none)"))
+
+def require_device(path: str):
+    if not os.path.exists(path):
+        list_uarts()
+        raise FileNotFoundError(
+            f"{path} does not exist. Check overlays / wiring. "
+            f"Pick from the ttyAMA devices listed above."
+        )
+
 def open_serial(port: str, baud: int, timeout: float = 2.0) -> serial.Serial:
-    """Open a serial port with helpful debug on failure."""
+    require_device(port)
     try:
         s = serial.Serial(port=port, baudrate=baud, timeout=timeout)
         dbg(f"Opened {port} @ {baud} baud (timeout={timeout}s)")
@@ -29,28 +45,8 @@ def open_serial(port: str, baud: int, timeout: float = 2.0) -> serial.Serial:
         dbg(f"ERROR opening {port} @ {baud}: {repr(e)}")
         raise
 
-def port_sanity_check(port: str, baud: int, seconds: float = 1.0):
-    """
-    Reads raw bytes for a moment to prove the port is alive.
-    For Plantower, you should usually see bytes streaming.
-    For SPS30, you may see nothing until commands are sent (that's OK).
-    """
-    dbg(f"Sanity check {port} @ {baud} for {seconds:.1f}s...")
-    try:
-        s = open_serial(port, baud, timeout=0.2)
-        start = time.time()
-        total = 0
-        while time.time() - start < seconds:
-            chunk = s.read(256)
-            total += len(chunk)
-        s.close()
-        dbg(f"Sanity check result {port}: read {total} bytes total")
-    except Exception as e:
-        dbg(f"Sanity check FAILED for {port}: {repr(e)}")
-
-
 ###############################################
-#  Plantower Driver (PMS5003 / PMS5003ST)
+#  Plantower Driver (PMS5003ST 40-byte)
 ###############################################
 class Plantower:
     def __init__(self, port: str):
@@ -58,8 +54,6 @@ class Plantower:
         self.port = open_serial(port, 9600, timeout=2)
 
     def read_frame(self):
-        """Reads a 40-byte Plantower ST frame. Returns dict or None."""
-        # Find start bytes 0x42 0x4D
         while True:
             b1 = self.port.read(1)
             if not b1:
@@ -73,7 +67,6 @@ class Plantower:
                     return self.parse_frame(frame)
 
     def parse_frame(self, frame: bytes):
-        """Parses PMS5003ST frame. Returns dict or None on checksum mismatch."""
         checksum = sum(frame[0:38]) & 0xFFFF
         recvd = (frame[38] << 8) + frame[39]
         if checksum != recvd:
@@ -101,9 +94,8 @@ class Plantower:
 
         return data
 
-
 ###############################################
-#  SPS30 UART Driver (SHDLC)
+#  SPS30 UART Driver (SHDLC-ish)
 ###############################################
 class SPS30_UART:
     START = 0x7E
@@ -138,9 +130,8 @@ class SPS30_UART:
         return data
 
     def start_measurement(self):
-        # mass concentration mode
-        self.send_cmd(0x00, b'\x01\x03')
-        _ = self.read_response()  # optional; may be None depending on sensor timing
+        self.send_cmd(0x00, b'\x01\x03')  # mass concentration mode
+        _ = self.read_response()
 
     def read(self):
         self.send_cmd(0x03)
@@ -166,14 +157,9 @@ class SPS30_UART:
             "avg_size": vals[9]
         }
 
-
 def main():
     dbg("Starting sensor logger...")
-
-    # Optional: quick sanity checks (uncomment if needed)
-    # port_sanity_check(PT1_PORT, 9600, seconds=1.0)
-    # port_sanity_check(PT2_PORT, 9600, seconds=1.0)
-    # port_sanity_check(SPS_PORT, 115200, seconds=1.0)
+    list_uarts()
 
     pt1 = Plantower(PT1_PORT)
     pt2 = Plantower(PT2_PORT)
@@ -195,7 +181,7 @@ def main():
         "sps_pm1", "sps_pm2_5", "sps_pm4", "sps_pm10",
         "sps_nc0_5", "sps_nc1_0", "sps_nc2_5",
         "sps_nc4_0", "sps_nc10", "sps_size",
-        # debug
+        # debug flags
         "ok_pt1", "ok_pt2", "ok_sps"
     ]
 
@@ -210,32 +196,28 @@ def main():
             ok1 = ok2 = ok3 = False
             d1 = d2 = d3 = None
 
-            # Read PT1
             try:
                 d1 = pt1.read_frame()
                 ok1 = d1 is not None
                 if not ok1:
-                    dbg("PT1 read returned None (timeout or checksum)")
+                    dbg("PT1 read returned None (timeout/checksum)")
             except Exception as e:
                 dbg(f"PT1 ERROR: {repr(e)}")
 
-            # Read PT2
             try:
                 d2 = pt2.read_frame()
                 ok2 = d2 is not None
                 if not ok2:
-                    dbg("PT2 read returned None (timeout or checksum)")
+                    dbg("PT2 read returned None (timeout/checksum)")
             except Exception as e:
                 dbg(f"PT2 ERROR: {repr(e)}")
 
-            # Read SPS30
             try:
                 d3 = sps.read()
                 ok3 = d3 is not None
             except Exception as e:
                 dbg(f"SPS30 ERROR: {repr(e)}")
 
-            # Fill row with blanks if something is missing (so you can see failures)
             def pt_row(d):
                 if not d:
                     return [""] * 12
@@ -256,13 +238,11 @@ def main():
                 ]
 
             row = [ts] + pt_row(d1) + pt_row(d2) + sps_row(d3) + [int(ok1), int(ok2), int(ok3)]
-
             writer.writerow(row)
             f.flush()
 
             dbg(f"Logged {ts} (pt1={ok1}, pt2={ok2}, sps={ok3})")
             time.sleep(1)
-
 
 if __name__ == "__main__":
     main()
