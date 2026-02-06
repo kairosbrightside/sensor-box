@@ -5,7 +5,7 @@ from sensirion_shdlc_driver.command import ShdlcCommand
 
 logging.basicConfig(level=logging.DEBUG)
 
-PORT = "/dev/serial0"   # try this first; else "/dev/ttyAMA0"
+PORT = "/dev/ttyAMA0"   
 BAUD = 115200
 
 with ShdlcSerialPort(port=PORT, baudrate=BAUD) as sp:
