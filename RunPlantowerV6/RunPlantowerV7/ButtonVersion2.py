@@ -5,8 +5,8 @@ import RPi.GPIO as GPIO
 import time
 import subprocess
 
-import CheckOperationVersion1v3 as CheckOP
-import StartUpWatchDogVersion1v3 as WatchDog
+import CheckOperationVersion2 as CheckOP
+import watchdog as WatchDog
         
 #setup board
 GPIO.setwarnings(False)
