@@ -20,7 +20,7 @@ SPS_PORT = "/dev/ttyAMA0"
 ZERO_FILE = "/media/particulatepi/data/PMoutputData/ZeroCall.txt"
 HEATER_FILE = "/media/particulatepi/data/PMoutputData/HeaterRelay.txt"
 
-LOG_FILE = "deq_style_log.csv"
+LOG_FILE = "particle_log.csv"
 
 SAMPLE_RATE = 2  # seconds
 
