@@ -7,7 +7,7 @@
 
 # ===== CONFIG =====
 
-SITE="BOX"
+SITE="PSU"
 
 # Plantower sensors: (SN PORT)
 SENSORS=(

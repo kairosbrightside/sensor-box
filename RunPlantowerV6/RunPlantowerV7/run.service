@@ -1,0 +1,24 @@
+[Unit]
+Description=RunPlantower V7 Sensor System
+After=network.target
+
+[Service]
+Type=simple
+User=piray
+WorkingDirectory=/home/piray/sensor-box/RunPlantowerV6/RunPlantowerV7
+
+ExecStart=/home/piray/sensor-box/RunPlantowerV6/RunPlantowerV7/run_all.sh
+
+StandardOutput=append:/home/piray/sensor-box/RunPlantowerV6/RunPlantowerV7/system.log
+StandardError=append:/home/piray/sensor-box/RunPlantowerV6/RunPlantowerV7/system.log
+
+
+# Restart if anything crashes
+Restart=always
+RestartSec=5
+
+
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
