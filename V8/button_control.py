@@ -2,12 +2,12 @@ from gpiozero import Button
 import time
 import subprocess
 
-import CheckOperationVersion1v3 as CheckOP
-import StartUpWatchDogVersion1v3 as WatchDog
+import RunPlantowerV6/CheckOperationVersion1v3.py as CheckOP
+import watchdog as WatchDog
 
 BUTTON_PIN = 4
 
-# Create button with pull-up (matches your wiring)
+# Create button with pull-up
 button = Button(BUTTON_PIN, pull_up=True, hold_time=1)
 
 press_start = None

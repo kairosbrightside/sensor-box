@@ -18,7 +18,7 @@ SITE = "PSU"
 SN1 = "1"
 SN2 = "2"
 
-DATA_DIR = "/media/particulatepi/data/PMoutputData/"
+DATA_DIR = "/media/piray/data/PMoutputData/"
 CSV_LOG = "particle_log.csv"
 
 ZERO_FILE = DATA_DIR + "ZeroCall.txt"
@@ -99,7 +99,7 @@ def main():
 
     last_minute = datetime.now().minute
 
-    # Combined CSV (your data)
+    # Combined CSV 
     with open(CSV_LOG, "w", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([
@@ -142,7 +142,7 @@ def main():
                 sps_val = process(buffers["sps"], "sps")
 
                 # =========================
-                # WRITE YOUR CSV
+                # WRITE CSV
                 # =========================
                 row = [
                     now.isoformat(timespec="seconds"),
