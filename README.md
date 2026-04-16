@@ -27,9 +27,6 @@ Plus wire, connectors, filament, screws, tools, etc?
 # Picture
 [![SensOR box](images/sensORbox.png)](images/sensORbox.pdf)
 
-# Relation to E&M
-It's got circuits! I need to apply Ohm's Law, Kirchoff's Laws, and power calculations... I can also write about how the particle sensors use optical scattering as a detection method (I think that counts?).
-
 Plantower sensor pinout
 <img width="874" height="399" alt="image" src="https://github.com/user-attachments/assets/1f3c9a76-47be-40a2-8d39-d621451f01c3" />
 
@@ -40,11 +37,11 @@ Plantower sensor pinout
 |--------------|-----|-----------|---------------------------------------|
 | 6            | —   | GND       | Ground for ALL devices                |
 | 7            | 4   | GPIO4     | Button                                |
-| 8            | 14  | TXD0      | Plantower #1 → RX  (UART0)            |
-| 10           | 15  | RXD0      | Plantower #1 ← TX   (UART0)           |
+| 8            | 14  | TXD0      | SPS30 → RX  (UART0)                   |
+| 10           | 15  | RXD0      | SPS30 ← TX   (UART0)                  |
 | 11           | 17  | GPIO17    | Fan tachometer                        |
-| 27           | 0   | TXD1      | SPS30 → RX (UART1 TX → Pi RX)         |
-| 28           | 1   | RXD1      | SPS30 ← TX (UART1 RX ← Pi TX)         |
+| 27           | 0   | TXD1      | Plantower #1 → RX (UART1 TX → Pi RX)  |
+| 28           | 1   | RXD1      | Plantower #1 ← TX (UART1 RX ← Pi TX)  |
 | 32           | 12  | TXD4      | Plantower #2 → RX (UART4 TX → Pi RX)  |
 | 33           | 13  | RXD4      | Plantower #2 ← TX (UART4 RX ← Pi TX)  |
 | 37           | 26  | GPIO26    | Plantower power (Relay1)              |
@@ -78,7 +75,10 @@ sudo cat /dev/ttyAMA4
 Particle sensors (3x), level shifters
 
 ### Connect to Pi 3.3V output
-The `SET` and `RESET` pins of the Plantower sensors... oopsies!
+The `SET` and `RESET` pins of the Plantower sensors.
 
 ### 12V devices:
 Fan, Pumps, motorized ball valce, heater strip+ (rheostat)
+
+## System functions:
+The system takes in air through the top, when the valve is open and the relay is connected to the NO terminal. When the valve is closed, the zero air pump is calibrating the system by running zero air through it. The fan at the bottom blows out the air. The heater in the tube keeps temperature constant to ensure a constant volume enters the sample chamber. 

@@ -5,7 +5,7 @@ import os
 from datetime import datetime
 
 LOG_FILE = "sensor_log.csv"
-CHECK_INTERVAlL = 60  # seconds
+CHECK_INTERVAL = 60  # seconds
 
 def is_process_running(name):
     try:
