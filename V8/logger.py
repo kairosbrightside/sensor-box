@@ -18,13 +18,13 @@ SITE = "PSU"
 SN1 = "1"
 SN2 = "2"
 
-DATA_DIR = "/media/piray/data/PMoutputData/"
-CSV_LOG = "particle_log.csv"
+DATA_DIR = "/home/piray/sensor-box/V8/"
+CSV_LOG = None
 
 ZERO_FILE = DATA_DIR + "ZeroCall.txt"
 HEATER_FILE = DATA_DIR + "HeaterRelay.txt"
 
-SAMPLE_RATE = 2
+SAMPLE_RATE = 10
 
 
 # =========================
@@ -88,7 +88,7 @@ def format_envidas(dt, data, zero, sn):
 # MAIN
 # =========================
 def main():
-
+    ### ADD ZEROING LATER
     pt1 = Plantower(PT1_PORT)
     pt2 = Plantower(PT2_PORT)
     sps = SPS30(SPS_PORT)
@@ -98,88 +98,141 @@ def main():
     zero_offsets = {"pt1": 0, "pt2": 0, "sps": 0}
 
     last_minute = datetime.now().minute
+    current_day = datetime.now().strftime("%Y_%m_%d")
 
-    # Combined CSV 
-    with open(CSV_LOG, "w", newline="") as f:
-        writer = csv.writer(f)
-        writer.writerow([
-            "timestamp",
-            "pt1_pm2_5", "pt2_pm2_5", "sps_pm2_5",
-            "pt1_temp", "pt1_rh",
-            "pt2_temp", "pt2_rh",
-            "zero", "heater"
-        ])
+    writer = None
+    csv_file = None
 
-        while True:
+    while True:
 
-            zero = read_state(ZERO_FILE)
-            heater = read_state(HEATER_FILE)
+        now = datetime.now()
 
-            # Read sensors
-            for name, sensor in [("pt1", pt1), ("pt2", pt2), ("sps", sps)]:
+        # =========================
+        # DAILY FILE ROTATION
+        # =========================
+        new_day = now.strftime("%Y_%m_%d")
+
+        if new_day != current_day or writer is None:
+
+            current_day = new_day
+
+            if csv_file:
+                csv_file.close()
+
+            filename = f"{SITE}_{current_day}.csv"
+            path = os.path.join(DATA_DIR, filename)
+
+            file_exists = os.path.exists(path)
+
+            csv_file = open(path, "a", newline="")
+            writer = csv.writer(csv_file)
+
+            # only write header once
+            if not file_exists:
+                writer.writerow([
+                    "timestamp",
+                    "pt1_pm2_5",
+                    "pt2_pm2_5",
+                    "sps_pm2_5",
+                    "pt1_temp",
+                    "pt1_rh",
+                    "pt2_temp",
+                    "pt2_rh",
+                    "zero",
+                    "heater"
+                ])
+
+            print(f"Opened daily log: {filename}")
+
+        # =========================
+        # READ STATES
+        # =========================
+        zero = read_state(ZERO_FILE)
+        heater = read_state(HEATER_FILE)
+
+        # =========================
+        # READ SENSORS
+        # =========================
+        for name, sensor in [("pt1", pt1), ("pt2", pt2), ("sps", sps)]:
+            try:
                 data = sensor.read()
-                if data:
-                    last[name] = data
-                    buffers[name].append(data["pm2_5"])
+            except Exception as e:
+                print(f"Error reading {name}: {e}")
+                data = None
 
-            now = datetime.now()
+            if data:
+                last[name] = data
+                buffers[name].append(data["pm2_5"])
 
-            # Every minute → process
-            if now.minute != last_minute:
+        # =========================
+        # PROCESS ONCE PER MINUTE
+        # =========================
+        if now.minute != last_minute:
 
-                def process(buf, key):
-                    if not buf:
-                        return None
-                    avg = statistics.mean(buf)
+            def process(buf, key):
 
-                    if zero:
-                        zero_offsets[key] = avg
-                        return 0
-                    return avg - zero_offsets[key]
+                if not buf:
+                    return 999
 
-                pt1_val = process(buffers["pt1"], "pt1")
-                pt2_val = process(buffers["pt2"], "pt2")
-                sps_val = process(buffers["sps"], "sps")
+                avg = statistics.mean(buf)
 
-                # =========================
-                # WRITE CSV
-                # =========================
-                row = [
-                    now.isoformat(timespec="seconds"),
-                    pt1_val, pt2_val, sps_val,
+                # during zeroing:
+                # update offset
+                if zero:
+                    zero_offsets[key] = avg
+                    return 0
 
-                    last["pt1"]["temp"] if last["pt1"] else None,
-                    last["pt1"]["rh"] if last["pt1"] else None,
+                return avg - zero_offsets[key]
 
-                    last["pt2"]["temp"] if last["pt2"] else None,
-                    last["pt2"]["rh"] if last["pt2"] else None,
+            pt1_val = process(buffers["pt1"], "pt1")
+            pt2_val = process(buffers["pt2"], "pt2")
+            sps_val = process(buffers["sps"], "sps")
 
-                    int(zero),
-                    int(heater)
-                ]
+            # =========================
+            # WRITE DAILY CSV
+            # =========================
+            row = [
+                now.isoformat(timespec="seconds"),
 
-                writer.writerow(row)
-                f.flush()
+                pt1_val,
+                pt2_val,
+                sps_val,
 
-                # =========================
-                # WRITE ENVIDAS FILES
-                # =========================
-                if last["pt1"]:
-                    row1 = format_envidas(now, last["pt1"], zero, SN1)
-                    write_envidas(SN1, row1)
+                last["pt1"]["temp"] if last["pt1"] else 999,
+                last["pt1"]["rh"] if last["pt1"] else 999,
 
-                if last["pt2"]:
-                    row2 = format_envidas(now, last["pt2"], zero, SN2)
-                    write_envidas(SN2, row2)
+                last["pt2"]["temp"] if last["pt2"] else 999,
+                last["pt2"]["rh"] if last["pt2"] else 999,
 
-                # reset buffers
-                for b in buffers.values():
-                    b.clear()
+                int(zero),
+                int(heater)
+            ]
 
-                last_minute = now.minute
-                print("Logged minute data")
+            writer.writerow(row)
+            csv_file.flush()
 
-            time.sleep(SAMPLE_RATE)
+            # =========================
+            # WRITE ENVIDAS FILES
+            # =========================
+            """             if last["pt1"]:
+                row1 = format_envidas(now, last["pt1"], zero, SN1)
+                write_envidas(SN1, row1)
+
+            if last["pt2"]:
+                row2 = format_envidas(now, last["pt2"], zero, SN2)
+                write_envidas(SN2, row2) """
+
+            # =========================
+            # RESET BUFFERS
+            # =========================
+            for b in buffers.values():
+                b.clear()
+
+            last_minute = now.minute
+
+            print(f"[{now}] Logged minute average")
+
+        time.sleep(SAMPLE_RATE)
 
 
 if __name__ == "__main__":

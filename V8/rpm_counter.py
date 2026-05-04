@@ -1,7 +1,7 @@
 from gpiozero import Button
 import time
 
-PIN = 17
+PIN = 22
 PULSES_PER_REV = 2
 
 count = 0
@@ -17,4 +17,4 @@ while True:
     count = 0
     time.sleep(1)
     rpm = (count / PULSES_PER_REV) * 60
-    print("RPM:", rpm)
+    #print("RPM:", rpm)

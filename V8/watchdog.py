@@ -1,31 +1,118 @@
-import subprocess, time, os
+import subprocess
+import time
+import os
+
+# =========================
+# CONFIG
+# =========================
+
+SERVICE_NAME = "sensor-box.service"
+
+REQUIRED_PROCESSES = [
+    "logger.py",
+    "hardware_control.py",
+    "rpm_counter.py",
+    "periodic_restart.py",
+]
+
+DATA_DIR = "/home/piray/sensor-box/V8/"
+
+RESTART_COOLDOWN = 300   # seconds
+
+
+# =========================
+# PROCESS CHECK
+# =========================
 
 def processes_running():
-    ps = subprocess.check_output(['ps', '-ef']).decode()
 
-    required = [
-        "main_logger.py",
-        "zero_control.py",
-        "RPM"
-    ]
-
-    return all(r in ps for r in required)
-
-
-def data_updating(path):
     try:
-        return (time.time() - os.path.getmtime(path)) < 120
-    except:
+        ps = subprocess.check_output(['ps', '-ef']).decode()
+
+        missing = []
+
+        for proc in REQUIRED_PROCESSES:
+            if proc not in ps:
+                missing.append(proc)
+
+        if missing:
+            print("Missing processes:", missing)
+            return False
+
+        return True
+
+    except Exception as e:
+        print("Process check failed:", e)
         return False
 
 
+# =========================
+# DATA CHECK
+# =========================
+
+def data_updating(data_dir, max_age=120):
+
+    try:
+
+        today = time.strftime("%Y_%m_%d")
+        filename = f"PSU_{today}.csv"
+
+        path = os.path.join(data_dir, filename)
+
+        age = time.time() - os.path.getmtime(path)
+
+        if age > max_age:
+            print(f"Data file stale: {age:.1f} sec old")
+            return False
+
+        return True
+
+    except Exception as e:
+        print("Data check failed:", e)
+        return False
+
+
+# =========================
+# RESTART
+# =========================
+
+last_restart = 0
+
+def restart_service(reason):
+
+    global last_restart
+
+    now = time.time()
+
+    # prevent restart loops
+    if now - last_restart < RESTART_COOLDOWN:
+        print("Restart suppressed (cooldown)")
+        return
+
+    last_restart = now
+
+    print(f"Restarting service: {reason}")
+
+    try:
+        subprocess.run([
+            'sudo',
+            'systemctl',
+            'restart',
+            SERVICE_NAME
+        ])
+
+    except Exception as e:
+        print("Restart failed:", e)
+
+
+### main
+
 while True:
+
     if not processes_running():
-        print("Process failure → restart")
-        subprocess.run(['systemctl', 'restart', 'runPMshell'])
-    
-    if not data_updating("particle_log.csv"):
-        print("Data stale → restart")
-        subprocess.run(['systemctl', 'restart', 'runPMshell'])
+        restart_service("missing process")
+
+    elif not data_updating(DATA_DIR):
+        restart_service("stale data")
 
     time.sleep(60)

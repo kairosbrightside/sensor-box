@@ -2,7 +2,7 @@ from gpiozero import Button
 import time
 import subprocess
 
-import RunPlantowerV6/CheckOperationVersion1v3.py as CheckOP
+import CheckOperationVersion1v3 as CheckOP
 import watchdog as WatchDog
 
 BUTTON_PIN = 4
