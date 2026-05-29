@@ -1,14 +1,13 @@
 from gpiozero import DigitalOutputDevice
 import time
 import os
-
+from config import CONTROL_DIR
 # =========================
 # CONFIG
 # =========================
-DATA_DIR = "/home/piray/sensor-box/data/"
 
-ZERO_FILE = os.path.join(DATA_DIR, "ZeroCall.txt")
-HEATER_FILE = os.path.join(DATA_DIR, "HeaterRelay.txt")
+ZERO_FILE = os.path.join(CONTROL_DIR, "ZeroCall.txt")
+HEATER_FILE = os.path.join(CONTROL_DIR, "HeaterRelay.txt")
 
 ALERT_FILE = "/tmp/sensor_alert.txt"
 

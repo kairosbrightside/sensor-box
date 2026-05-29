@@ -10,19 +10,18 @@ from sensors.sps30 import SPS30
 # =========================
 # CONFIG
 # =========================
-PT1_PORT = "/dev/ttyAMA1"
-PT2_PORT = "/dev/ttyAMA4"
-SPS_PORT = "/dev/ttyAMA0"
+from config import (
+    DATA_DIR,
+    CONTROL_DIR,
+    SITE,
+    PT1_PORT,
+    PT2_PORT,
+    SPS_PORT,
+)
 
-SITE = "PSU"
-SN1 = "1"
-SN2 = "2"
-
-DATA_DIR = "/home/piray/sensor-box/data/"
+ZERO_FILE = CONTROL_DIR / "ZeroCall.txt"
+HEATER_FILE = CONTROL_DIR / "HeaterRelay.txt"
 CSV_LOG = None
-
-ZERO_FILE = DATA_DIR + "ZeroCall.txt"
-HEATER_FILE = DATA_DIR + "HeaterRelay.txt"
 
 SAMPLE_RATE = 10
 

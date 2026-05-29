@@ -2,11 +2,10 @@ import subprocess
 import time
 import os
 
+from config import DATA_DIR, SERVICE_NAME
 # =========================
 # CONFIG
 # =========================
-
-SERVICE_NAME = "sensor-box.service"
 
 REQUIRED_PROCESSES = [
     "logger.py",
@@ -15,7 +14,6 @@ REQUIRED_PROCESSES = [
     "periodic_restart.py",
 ]
 
-DATA_DIR = "/home/piray/sensor-box/data/"
 
 RESTART_COOLDOWN = 300   # seconds
 
